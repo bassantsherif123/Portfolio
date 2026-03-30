@@ -59,42 +59,80 @@ window.addEventListener('scroll', () => {
 
 // ==================== Form Submission ====================
 const contactForm = document.querySelector('.contact-form');
-contactForm.addEventListener('submit', function (e) {
-    e.preventDefault();
-    
-    // Get form values
-    const formData = new FormData(this);
-    const inputs = this.querySelectorAll('input, textarea');
-    
-    // Simple validation
-    let isValid = true;
-    inputs.forEach(input => {
-        if (!input.value.trim()) {
-            isValid = false;
-            input.style.borderColor = '#ef4444';
-        } else {
-            input.style.borderColor = '';
-        }
-    });
-    
-    if (isValid) {
-        // Show success message (you can integrate with email service here)
-        const submitBtn = this.querySelector('button[type="submit"]');
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = '✓ Message Sent!';
-        submitBtn.style.background = 'linear-gradient(135deg, #10b981, #34d399)';
+if (contactForm) {
+    contactForm.addEventListener('submit', function (e) {
+        e.preventDefault();
         
-        // Reset form
-        this.reset();
+        // Get form values
+        const formData = new FormData(this);
+        const inputs = this.querySelectorAll('input, textarea');
+        
+        // Simple validation
+        let isValid = true;
         inputs.forEach(input => {
-            input.style.borderColor = '';
+            if (!input.value.trim()) {
+                isValid = false;
+                input.style.borderColor = '#ef4444';
+            } else {
+                input.style.borderColor = '';
+            }
         });
         
-        // Restore button after 3 seconds
-        setTimeout(() => {
-            submitBtn.textContent = originalText;
-            submitBtn.style.background = '';
-        }, 3000);
+        if (isValid) {
+            // Show success message (you can integrate with email service here)
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '✓ Message Sent!';
+            submitBtn.style.background = 'linear-gradient(135deg, #10b981, #34d399)';
+            
+            // Reset form
+            this.reset();
+            inputs.forEach(input => {
+                input.style.borderColor = '';
+            });
+            
+            // Restore button after 3 seconds
+            setTimeout(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.style.background = '';
+            }, 3000);
+        }
+    });
+}
+
+const imageModal = document.getElementById('imageModal');
+const modalImage = imageModal?.querySelector('img');
+const modalCaption = imageModal?.querySelector('.modal-caption');
+const modalClose = imageModal?.querySelector('.modal-close');
+const certificateThumbnails = document.querySelectorAll('.certificate-thumbnail');
+
+const closeImageModal = () => {
+    if (!imageModal) return;
+    imageModal.classList.remove('active');
+    document.body.style.overflow = '';
+};
+
+certificateThumbnails.forEach(card => {
+    card.addEventListener('click', () => {
+        const image = card.querySelector('img');
+        if (!image || !imageModal || !modalImage) return;
+        modalImage.src = image.src;
+        modalImage.alt = image.alt || 'Certificate';
+        modalCaption.textContent = card.dataset.caption || 'Certificate Preview';
+        imageModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    });
+});
+
+modalClose?.addEventListener('click', closeImageModal);
+imageModal?.addEventListener('click', (e) => {
+    if (e.target === imageModal) {
+        closeImageModal();
+    }
+});
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeImageModal();
     }
 });
 
@@ -103,6 +141,61 @@ const observerOptions = {
     threshold: 0.1,
     rootMargin: '0px 0px -100px 0px'
 };
+
+const projectModal = document.getElementById('projectModal');
+const modalTitle = projectModal?.querySelector('#modalTitle');
+const modalImpact = projectModal?.querySelector('.modal-impact');
+const modalTags = projectModal?.querySelector('.modal-tags');
+const modalBody = projectModal?.querySelector('.modal-body');
+const modalCloseBtn = projectModal?.querySelector('.modal-close');
+const modalOverlay = projectModal?.querySelector('.modal-overlay');
+
+const detailButtons = document.querySelectorAll('.view-more');
+detailButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        const card = button.closest('.project-card');
+        if (!card || !projectModal || !modalTitle || !modalImpact || !modalTags || !modalBody) return;
+
+        const title = card.querySelector('.project-summary h3')?.textContent || '';
+        const impact = card.querySelector('.project-impact')?.textContent || '';
+        const tags = card.querySelectorAll('.project-tags span');
+        const details = card.querySelector('.project-details');
+
+        modalTitle.textContent = title;
+        modalImpact.textContent = impact;
+        modalTags.innerHTML = '';
+        tags.forEach(tag => {
+            const span = document.createElement('span');
+            span.textContent = tag.textContent;
+            modalTags.appendChild(span);
+        });
+
+        if (details) {
+            modalBody.innerHTML = details.innerHTML;
+        } else {
+            modalBody.innerHTML = '<p>No details available.</p>';
+        }
+
+        projectModal.classList.add('active');
+        projectModal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    });
+});
+
+const closeProjectModal = () => {
+    if (!projectModal) return;
+    projectModal.classList.remove('active');
+    projectModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+};
+
+modalCloseBtn?.addEventListener('click', closeProjectModal);
+modalOverlay?.addEventListener('click', closeProjectModal);
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeProjectModal();
+    }
+});
 
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -120,11 +213,13 @@ document.querySelectorAll('.skill-category, .project-card, .stat-card, .timeline
 
 // ==================== CV Link Handler ====================
 const cvLink = document.querySelector('.cv-link');
-cvLink.addEventListener('click', function (e) {
-    // You can replace this with actual CV file path
-    console.log('CV download initiated');
-    // e.preventDefault(); // Uncomment and add actual CV file when ready
-});
+if (cvLink) {
+    cvLink.addEventListener('click', function (e) {
+        // You can replace this with actual CV file path
+        console.log('CV download initiated');
+        // e.preventDefault(); // Uncomment and add actual CV file when ready
+    });
+}
 
 // ==================== Ripple Effect on Buttons ====================
 document.querySelectorAll('.btn, .skill-tag, .social-links a').forEach(button => {
